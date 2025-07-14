@@ -16,15 +16,21 @@ jobs:
       - name: Checkout user config
         uses: actions/checkout@v4
 
-      - name: Clone ZMK
+      - name: Clone ZMK firmware
         run: |
           git clone --recurse-submodules https://github.com/zmkfirmware/zmk.git zmk
 
-      - name: Setup Zephyr project & SDK
-        uses: zephyrproject-rtos/action-zephyr-setup@v1
-        with:
-          app-path: zmk/app
-          toolchains: arm-zephyr-eabi
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y python3-pip ninja-build gperf ccache dfu-util wget cmake
+          pip3 install west
+
+      - name: Initialize West workspace
+        run: |
+          west init -l config
+          west update
+          west zephyr-export
 
       - name: Build (Cradio Left + Nice!Nano v1)
         run: |
