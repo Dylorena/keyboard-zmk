@@ -8,30 +8,38 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash
+
     steps:
       - name: Checkout user config
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Clone ZMK
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           repository: zmkfirmware/zmk
           path: zmk
           submodules: true
 
-      - name: Set up Zephyr SDK
-        uses: zmkfirmware/setup-zephyr-sdk@v1
-
-      - name: Build Left (Cradio + Nice!Nano v1)
+      - name: Install dependencies
         run: |
+          sudo apt-get update
+          sudo apt-get install -y python3-pip ninja-build gperf ccache dfu-util wget cmake
+          pip3 install west
           west init -l config
           west update
+          west zephyr-export
+
+      - name: Build (Cradio Left + Nice!Nano v1)
+        run: |
           west build -s zmk/app -b nice_nano -- -DSHIELD=cradio_left
           mkdir -p output
           cp build/zephyr/zmk.uf2 output/cradio_left-nice_nano.zmk.uf2
 
-      - name: Upload Artifact
-        uses: actions/upload-artifact@v3
+      - name: Upload firmware
+        uses: actions/upload-artifact@v4
         with:
           name: firmware
-          path: output/*
+          path: output/
