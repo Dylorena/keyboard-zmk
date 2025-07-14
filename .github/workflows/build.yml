@@ -17,11 +17,8 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Clone ZMK
-        uses: actions/checkout@v4
-        with:
-          repository: zmkfirmware/zmk
-          path: zmk
-          submodules: true
+        run: |
+          git clone --recurse-submodules https://github.com/zmkfirmware/zmk.git zmk
 
       - name: Install dependencies
         run: |
